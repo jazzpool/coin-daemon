@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "description": "Cryptocurrency daemon interface",
   "main": "index.js",
+  "repository": "https://github.com/zefirka/coin-daemon-interface.git",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
