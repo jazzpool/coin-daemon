@@ -1,15 +1,16 @@
 {
   "name": "coin-daemon",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Cryptocurrency daemon interface",
   "main": "index.js",
-  "repository": "https://github.com/zefirka/coin-daemon-interface.git",
+  "repository": "https://github.com/zefirka/coin-daemon.git",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "async": "^2.6.0"
+    "async": "^2.6.0",
+    "promise": "^8.0.1"
   }
 }

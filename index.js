@@ -1,5 +1,7 @@
 'use strict';
 
+var Promise = typeof Promise === 'undefined' ? require('promise') : this.Promise;
+
 /** 
  * The daemon interface interacts with the coin daemon by using the rpc interface.
  * in order to make it work it needs, as constructor, an array of objects containing
@@ -15,7 +17,7 @@ var EventEmitter = require('events').EventEmitter;
 
 var async = require('async');
 
-module.exports = Daemon
+module.exports = Daemon;
 
 function performHttpRequest(instance, jsonData, callback){
     var options = {
@@ -140,7 +142,7 @@ Daemon.prototype.cmd = function cmd(method, params, callback, streamResults, ret
             callback(results);
         }
     });
-}
+};
 
 /**
  * Performs a batch JSON-RPC command - only uses the first configured rpc daemon
@@ -150,7 +152,7 @@ Daemon.prototype.cmd = function cmd(method, params, callback, streamResults, ret
  *    [ methodName, [params] ]
  * ]
  */
-function batchCmd(cmdArray, callback){
+Daemon.prototype.batchCmd = function batchCmd(cmdArray, callback) {
     var requestJson = [];
 
     for (var i = 0; i < cmdArray.length; i++){
@@ -166,7 +168,7 @@ function batchCmd(cmdArray, callback){
     performHttpRequest(this.instances[0], serializedRequest, function(error, result){
         callback(error, result);
     });
-}
+};
 
 Daemon.prototype.isOnline = function () {
     return this.cmd('getinfo', [], function(results){
@@ -177,7 +179,7 @@ Daemon.prototype.isOnline = function () {
         if (!allOnline)
             _this.emit('connectionFailed', results);
     });
-}
+};
 
 Daemon.prototype.init = function (callback) {
     this.isOnline(function(online){
@@ -186,4 +188,13 @@ Daemon.prototype.init = function (callback) {
             callback();
         }
     });
-}
+};
+
+Daemon.prototype.pCmd = function (method, params, streamResults, returnRawData) {
+    var self = this;
+    return new Promise(function (resolve, reject) {
+        return self.cmd(method, params, function (data) {
+            resolve(data);
+        }, streamResults, returnRawData);
+    });
+};
