@@ -34,7 +34,7 @@ function performHttpRequest(instance, jsonData, callback, logger){
         var dataJson;
 
         if (res.statusCode === 401){
-            llogger('error', 'Unauthorized RPC access - invalid RPC username or password');
+            logger('error', 'Unauthorized RPC access - invalid RPC username or password');
             return;
         }
 
