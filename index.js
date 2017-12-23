@@ -19,7 +19,7 @@ var async = require('async');
 
 module.exports = Daemon;
 
-function performHttpRequest(instance, jsonData, callback){
+function performHttpRequest(instance, jsonData, callback, logger){
     var options = {
         hostname: (typeof(instance.host) === 'undefined' ? '127.0.0.1' : instance.host),
         port    : instance.port,
@@ -34,7 +34,7 @@ function performHttpRequest(instance, jsonData, callback){
         var dataJson;
 
         if (res.statusCode === 401){
-            logger('error', 'Unauthorized RPC access - invalid RPC username or password');
+            llogger('error', 'Unauthorized RPC access - invalid RPC username or password');
             return;
         }
 
@@ -80,7 +80,7 @@ function performHttpRequest(instance, jsonData, callback){
 function Daemon(daemons, logger){
     var _this = this;
 
-    logger = logger || function(severity, message) {
+    this.logger = logger || function(severity, message) {
         console.log(severity + ': ' + message);
     };
 
@@ -106,6 +106,7 @@ Daemon.prototype = new EventEmitter();
  */
 Daemon.prototype.cmd = function cmd(method, params, callback, streamResults, returnRawData){
     var results = [];
+    var self = this;
 
     async.each(this.instances, function(instance, eachCallback) {
         var itemFinished = function(error, result, data) {
@@ -136,7 +137,7 @@ Daemon.prototype.cmd = function cmd(method, params, callback, streamResults, ret
 
         performHttpRequest(instance, requestJson, function(error, result, data){
             itemFinished(error, result, data);
-        });
+        }, self.logger);
     }, function(){
         if (!streamResults){
             callback(results);
@@ -167,7 +168,7 @@ Daemon.prototype.batchCmd = function batchCmd(cmdArray, callback) {
 
     performHttpRequest(this.instances[0], serializedRequest, function(error, result){
         callback(error, result);
-    });
+    }, self);
 };
 
 Daemon.prototype.isOnline = function () {
