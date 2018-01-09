@@ -154,6 +154,7 @@ Daemon.prototype.cmd = function cmd(method, params, callback, streamResults, ret
  * ]
  */
 Daemon.prototype.batchCmd = function batchCmd(cmdArray, callback) {
+    var self = this;
     var requestJson = [];
 
     for (var i = 0; i < cmdArray.length; i++){
