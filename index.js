@@ -12,7 +12,6 @@ var Promise = typeof Promise === 'undefined' ? require('promise') : this.Promise
 **/
 
 var http = require('http');
-var cp = require('child_process');
 var EventEmitter = require('events').EventEmitter;
 
 var async = require('async');
@@ -132,14 +131,14 @@ Daemon.prototype.cmd = function cmd(method, params, callback, streamResults, ret
         var requestJson = JSON.stringify({
             method: method,
             params: params,
-            id: Date.now() + Math.floor(Math.random() * 10)
+            id: Date.now() + Math.floor(Math.random() * 10),
         });
 
-        performHttpRequest(instance, requestJson, function(error, result, data){
+        performHttpRequest(instance, requestJson, function(error, result, data) {
             itemFinished(error, result, data);
         }, self.logger);
     }, function(){
-        if (!streamResults){
+        if (!streamResults) {
             callback(results);
         }
     });
@@ -167,24 +166,29 @@ Daemon.prototype.batchCmd = function batchCmd(cmdArray, callback) {
 
     var serializedRequest = JSON.stringify(requestJson);
 
-    performHttpRequest(this.instances[0], serializedRequest, function(error, result){
+    performHttpRequest(this.instances[0], serializedRequest, function(error, result) {
         callback(error, result);
     }, self);
 };
 
-Daemon.prototype.isOnline = function (callback) {
-    return this.cmd('getinfo', [], function(results){
-        var allOnline = results.every(function(result){
+Daemon.prototype.isOnline = function(callback) {
+    return this.cmd('getinfo', [], function(results) {
+        var allOnline = results.every(function(results) {
             return !results.error;
         });
+
         callback(allOnline);
-        if (!allOnline)
+
+        if (!allOnline) {
             _this.emit('connectionFailed', results);
+        }
     });
 };
 
 Daemon.prototype.init = function (callback) {
-    this.isOnline(function(online){
+    var _this = this;
+
+    this.isOnline(function(online) {
         if (online) {
             _this.emit('online');
             callback();
