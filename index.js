@@ -172,7 +172,7 @@ Daemon.prototype.batchCmd = function batchCmd(cmdArray, callback) {
     }, self);
 };
 
-Daemon.prototype.isOnline = function () {
+Daemon.prototype.isOnline = function (callback) {
     return this.cmd('getinfo', [], function(results){
         var allOnline = results.every(function(result){
             return !results.error;
