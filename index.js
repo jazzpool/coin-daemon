@@ -177,7 +177,7 @@ Daemon.prototype.isOnline = function(callback) {
             return !results.error;
         });
 
-        callback(allOnline);
+        typeof callback === 'function' && callback(allOnline);
 
         if (!allOnline) {
             _this.emit('connectionFailed', results);
@@ -191,7 +191,7 @@ Daemon.prototype.init = function (callback) {
     this.isOnline(function(online) {
         if (online) {
             _this.emit('online');
-            callback();
+            typeof callback === 'function' && callback();
         }
     });
 };
