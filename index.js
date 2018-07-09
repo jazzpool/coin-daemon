@@ -39,8 +39,7 @@ function performHttpRequest(instance, jsonData, callback, logger){
 
         try{
             dataJson = JSON.parse(data);
-        }
-        catch(e){
+        } catch(e) {
             if (data.indexOf(':-nan') !== -1){
                 data = data.replace(/:-nan,/g, ":0");
                 parseJson(res, data);
@@ -51,8 +50,10 @@ function performHttpRequest(instance, jsonData, callback, logger){
                 + '\nReponse Data: ' + data);
 
         }
-        if (dataJson)
+
+        if (dataJson) {
             callback(dataJson.error, dataJson, data);
+        }
     };
 
     var req = http.request(options, function(res) {
@@ -67,24 +68,23 @@ function performHttpRequest(instance, jsonData, callback, logger){
     });
 
     req.on('error', function(e) {
-        if (e.code === 'ECONNREFUSED')
+        if (e.code === 'ECONNREFUSED') {
             callback({type: 'offline', message: e.message}, null);
-        else
+        } else {
             callback({type: 'request error', message: e.message}, null);
+        }
     });
 
     req.end(jsonData);
 }
 
 function Daemon(daemons, logger){
-    var _this = this;
-
     this.logger = logger || function(severity, message) {
         console.log(severity + ': ' + message);
     };
 
     if (!Array.isArray(daemons)) {
-        daemons = [daemons]
+        daemons = [daemons];
     }
 
     var instances = daemons.map(function(daemon, index) {
@@ -172,6 +172,8 @@ Daemon.prototype.batchCmd = function batchCmd(cmdArray, callback) {
 };
 
 Daemon.prototype.isOnline = function(callback) {
+    var _this = this;
+
     return this.cmd('getinfo', [], function(results) {
         var allOnline = results.every(function(results) {
             return !results.error;
@@ -198,6 +200,7 @@ Daemon.prototype.init = function (callback) {
 
 Daemon.prototype.pCmd = function (method, params, streamResults, returnRawData) {
     var self = this;
+
     return new Promise(function (resolve, reject) {
         return self.cmd(method, params, function (data) {
             resolve(data);
