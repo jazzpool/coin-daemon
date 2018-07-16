@@ -1,6 +1,6 @@
 {
   "name": "coin-daemon",
-  "version": "0.10.0",
+  "version": "0.1.0",
   "description": "Cryptocurrency daemon interface",
   "main": "index.js",
   "repository": "https://github.com/zefirka/coin-daemon.git",
