@@ -79,7 +79,7 @@ function performHttpRequest(instance, jsonData, callback, logger){
 }
 
 function Daemon(daemons, logger, options){
-    this.options = options;
+    this.options = options || {};
 
     this.logger = logger || function(severity, message) {
         console.log(severity + ': ' + message);
@@ -109,45 +109,41 @@ Daemon.prototype.cmd = function cmd(method, params, callback, streamResults, ret
     var results = [];
     var self = this;
 
-    return new Promise(function (resolve) {
-        async.each(this.instances, function(instance, eachCallback) {
-            var itemFinished = function(error, result, data) {
-                var returnObj = {
-                    error: error,
-                    response: (result || {}).result,
-                    instance: instance
-                };
-    
-                if (returnRawData) {
-                    returnObj.data = data;
-                }
-                
-                if (streamResults) {
-                    callback(returnObj);
-                    resolve(returnObj);
-                } else {
-                    results.push(returnObj);
-                }
-                eachCallback();
-                itemFinished = function(){};
+    async.each(this.instances, function(instance, eachCallback) {
+        var itemFinished = function(error, result, data) {
+            var returnObj = {
+                error: error,
+                response: (result || {}).result,
+                instance: instance
             };
-    
-            var requestJson = JSON.stringify({
-                method: method,
-                params: params,
-                id: Date.now() + Math.floor(Math.random() * 10),
-            });
-    
-            performHttpRequest(instance, requestJson, function(error, result, data) {
-                itemFinished(error, result, data);
-            }, self.logger);
-        }, function(){
-            if (!streamResults) {
-                callback(results);
-                resolve(results);
+
+            if (returnRawData) {
+                returnObj.data = data;
             }
+            
+            if (streamResults) {
+                callback(returnObj);
+            } else {
+                results.push(returnObj);
+            }
+            eachCallback();
+            itemFinished = function(){};
+        };
+
+        var requestJson = JSON.stringify({
+            method: method,
+            params: params,
+            id: Date.now() + Math.floor(Math.random() * 10),
         });
-    })
+
+        performHttpRequest(instance, requestJson, function(error, result, data) {
+            itemFinished(error, result, data);
+        }, self.logger);
+    }, function(){
+        if (!streamResults) {
+            callback(results);
+        }
+    });
 };
 
 /**
@@ -172,19 +168,17 @@ Daemon.prototype.batchCmd = function batchCmd(cmdArray, callback) {
 
     var serializedRequest = JSON.stringify(requestJson);
 
-    return new Promise(function (resolve) {
-        performHttpRequest(this.instances[0], serializedRequest, function(error, result) {
-            callback(error, result);
-            resolve({error, result});
-        }, self);
-    });
+
+    performHttpRequest(this.instances[0], serializedRequest, function(error, result) {
+        callback(error, result);
+    }, self);
 };
 
 Daemon.prototype.isOnline = function(callback) {
     var _this = this;
     var initialInfo = this.options.deprecated ? 'getinfo' : 'getblockchaininfo';
 
-    return this.cmd('getinfo', [], function(results) {
+    return this.cmd(initialInfo, [], function(results) {
         var allOnline = results.every(function(results) {
             return !results.error;
         });
